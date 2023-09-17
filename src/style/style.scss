@@ -1,0 +1,59 @@
+$noColor: #C5FFFD;
+$color: #8B8BAE;
+
+$white: #E8E9F3;
+$black: #272635;
+
+body, ul {
+    background: $noColor;
+    padding: 0px;
+    margin: 0px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 99vw;
+    height: 99vh;
+    padding: 5px;
+
+    .space {
+        list-style: none;
+        width: 100% / 8;
+        border-radius: 8px;
+        position: relative;
+        &.white-black:nth-child(odd) {
+            background: $noColor;
+        }
+        &.white-black:nth-child(even) {
+            background: $color;
+        }
+
+        &.black-white:nth-child(even) {
+            background: $noColor;
+        }
+        &.black-white:nth-child(odd) {
+            background: $color;
+        }
+
+        &.white::after,
+        &.black::after {
+            content: '';
+            border-radius: 50%;
+            width: 50%;
+            height: 50%;
+            display: block;
+            position: absolute;
+            left: 25%;
+            top: 25%;
+        }
+
+        &.white::after {
+            background: $white !important;
+        }
+        &.black::after {
+            background: $black !important;
+        }
+    }
+}

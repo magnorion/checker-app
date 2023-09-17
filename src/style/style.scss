@@ -37,16 +37,22 @@ body, ul {
             background: $color;
         }
 
-        &.white::after,
-        &.black::after {
-            content: '';
-            border-radius: 50%;
-            width: 50%;
-            height: 50%;
-            display: block;
-            position: absolute;
-            left: 25%;
-            top: 25%;
+        &.white,
+        &.black {
+            cursor: pointer;
+            &::after {
+                content: '';
+                border-radius: 50%;
+                width: 50%;
+                height: 50%;
+                display: block;
+                position: absolute;
+                left: 25%;
+                top: 25%;
+            }
+            &:hover {
+                opacity: .8;
+            }
         }
 
         &.white::after {

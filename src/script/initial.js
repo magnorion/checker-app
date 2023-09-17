@@ -2,8 +2,27 @@ import { move } from "./moves";
 import { PLAYER_1, PLAYER_2 } from "./player";
 
 export const board = document.querySelector('.board');
-export const spaces = document.querySelectorAll('.space');
 
+/**
+ * cria o tabuleiro
+ */
+function createBoardSpaces() {
+    for (let _space = 1; _space <= 64; _space++) {
+        let li = document.createElement('li');
+        li.classList.add('space');
+
+        board.append(li);
+    }
+}
+
+createBoardSpaces();
+
+
+export const spaces = board.querySelectorAll('.space');
+
+/**
+ * configura o tabuleiro
+ */
 export function initialConfig() {
     // quantas casas por linha/coluna
     const limitPerRows = 8;
@@ -27,7 +46,13 @@ export function initialConfig() {
     
         space++;
     }
+}
 
+
+/**
+ * configura as pecas nas posicoes iniciais
+ */
+export function startPlayersPosition() {
     for (const _player of PLAYER_1) {
         move(_player.position, _player, 0);
     }
@@ -37,6 +62,4 @@ export function initialConfig() {
     }
 }
 
-export function startPlayersPosition() {
-    
-}
+startPlayersPosition();

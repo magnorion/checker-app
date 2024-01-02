@@ -3,6 +3,7 @@ $color: #8B8BAE;
 
 $white: #E8E9F3;
 $black: #272635;
+$selected: #e9c46a;
 
 body, ul {
     background: $noColor;
@@ -17,6 +18,7 @@ body, ul {
     width: 99vw;
     height: 99vh;
     padding: 5px;
+    max-width: 1100px !important;
 
     .space {
         list-style: none;
@@ -55,11 +57,26 @@ body, ul {
             }
         }
 
-        &.white::after {
-            background: $white !important;
+        &.white {
+            &::after {
+                background: $white;
+            }
+            &.selected::after {
+                background: mix($white, $selected, $weight: 60%);
+            }
         }
-        &.black::after {
-            background: $black !important;
+        &.black {
+            &::after {
+                background: $black;
+            }
+            &.selected::after {
+                background: mix($black, $selected, $weight: 60%);
+            }
+        }
+
+        &.highlight {
+            background: lighten($color: $color, $amount: 10) !important;
+            cursor: pointer;
         }
     }
 }

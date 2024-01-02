@@ -1,4 +1,4 @@
-export const PLAYER_1 = [
+const TICKERS_PLAYER_1 = [
     { position: 41, color: 'white', is_alive: true },
     { position: 43, color: 'white', is_alive: true },
     { position: 45, color: 'white', is_alive: true },
@@ -13,7 +13,7 @@ export const PLAYER_1 = [
     { position: 63, color: 'white', is_alive: true },
 ];
 
-export const PLAYER_2 = [
+const TICKERS_PLAYER_2 = [
     { position: 2, color: 'black', is_alive: true },
     { position: 4, color: 'black', is_alive: true },
     { position: 6, color: 'black', is_alive: true },
@@ -27,3 +27,32 @@ export const PLAYER_2 = [
     { position: 22, color: 'black', is_alive: true },
     { position: 24, color: 'black', is_alive: true },
 ];
+
+export class Player {
+    ticker = null;
+    
+    color = '';
+    tickers = [];
+    selected = null;
+
+    constructor(color, tickers) {
+        this.color = color;
+        this.tickers = tickers;
+    }
+
+    getTicker = (position) => {
+        return this.tickers.filter(_ticker => _ticker.position === position)[0];
+    }
+
+    selectTick = (tick) => {
+        if (!!tick && !!this.selected && tick.position === this.selected.position) {
+            this.selected = null;
+            return;
+        }
+
+        this.selected = tick;
+    }
+}
+
+export const PLAYER_1 = new Player('white', TICKERS_PLAYER_1);
+export const PLAYER_2 = new Player('black', TICKERS_PLAYER_2);

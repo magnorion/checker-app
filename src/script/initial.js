@@ -1,4 +1,4 @@
-import { move } from "./moves";
+import { initialMove, moveChecker } from "./moves";
 import { PLAYER_1, PLAYER_2 } from "./player";
 
 export const board = document.querySelector('.board');
@@ -10,13 +10,13 @@ function createBoardSpaces() {
     for (let _space = 1; _space <= 64; _space++) {
         let li = document.createElement('li');
         li.classList.add('space');
+        li.innerText = _space;
 
         board.append(li);
     }
 }
 
 createBoardSpaces();
-
 
 export const spaces = board.querySelectorAll('.space');
 
@@ -39,6 +39,9 @@ export function initialConfig() {
     
         _space.dataset.space = (row % 2 === 0 && space % 2 === 0) || (row % 2 !== 0 && space % 2 !== 0) ? -1 : 0;
         _space.dataset.position = space;
+        _space.dataset.row = row;
+
+        _space.addEventListener('click', () => moveChecker(_space));
     
         if (space % limitPerRows === 0) {
             row++;
@@ -53,12 +56,12 @@ export function initialConfig() {
  * configura as pecas nas posicoes iniciais
  */
 export function startPlayersPosition() {
-    for (const _player of PLAYER_1) {
-        move(_player.position, _player, 0);
+    for (const _ticker of PLAYER_1.tickers) {
+        initialMove(_ticker, 1);
     }
 
-    for (const _player of PLAYER_2) {
-        move(_player.position, _player, 0);
+    for (const _ticker of PLAYER_2.tickers) {
+        initialMove(_ticker, 2);
     }
 }
 

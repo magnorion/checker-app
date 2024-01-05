@@ -1,4 +1,4 @@
-import { initialMove, moveChecker } from "./moves";
+import { move, checkMoviment } from "./moves";
 import { PLAYER_1, PLAYER_2 } from "./player";
 
 export const board = document.querySelector('.board');
@@ -41,7 +41,7 @@ export function initialConfig() {
         _space.dataset.position = space;
         _space.dataset.row = row;
 
-        _space.addEventListener('click', () => moveChecker(_space));
+        _space.addEventListener('click', () => checkMoviment(_space));
     
         if (space % limitPerRows === 0) {
             row++;
@@ -57,11 +57,11 @@ export function initialConfig() {
  */
 export function startPlayersPosition() {
     for (const _ticker of PLAYER_1.tickers) {
-        initialMove(_ticker, 1);
+        move(_ticker, 1);
     }
 
     for (const _ticker of PLAYER_2.tickers) {
-        initialMove(_ticker, 2);
+        move(_ticker, 2);
     }
 }
 

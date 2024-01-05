@@ -1,7 +1,7 @@
 import { BOARD_SPACES } from "./initial";
 import { getCurrentPlayer } from "./player";
 
-export function initialMove(ticker, player, color = null) {
+export function move(ticker, player, color = null) {
     const space = BOARD_SPACES[ticker.position - 1];
     
     space.dataset.space = 1;
@@ -12,10 +12,10 @@ export function initialMove(ticker, player, color = null) {
     space.classList.add(applyTickColor);
 }
 
-export function move(position, player, oldPosition, currentPlayer) {
+export function prepareToMove(position, player, oldPosition, currentPlayer) {
     try {
         if (!currentPlayer || !currentPlayer.selected || !player) {
-            throw new Error('Nao foi possivel encontrar o jogador');
+            return;
         }
         
         currentPlayer.selected.position = position;
@@ -23,7 +23,7 @@ export function move(position, player, oldPosition, currentPlayer) {
         const spacePosition = oldPosition - 1;
         BOARD_SPACES[spacePosition].dataset.space = 0;
         
-        initialMove(currentPlayer.selected, player, currentPlayer.color);
+        move(currentPlayer.selected, player, currentPlayer.color);
 
         delete BOARD_SPACES[spacePosition].dataset.player;
         delete BOARD_SPACES[spacePosition].dataset.selected;
@@ -36,7 +36,7 @@ export function move(position, player, oldPosition, currentPlayer) {
     }
 }
 
-export function moveChecker(tick) {
+export function checkMoviment(tick) {
     // se o local clicado nao houver jogador, nao seguir!
     if (!tick?.dataset?.player) {
         return;
@@ -77,7 +77,7 @@ export function moveChecker(tick) {
 
     for (const _position of nextRowPositions) {
         const movePosition = () => {
-            move(
+            prepareToMove(
                 Number(BOARD_SPACES[_position].dataset.position),
                 tick?.dataset?.player,
                 Number(tick.dataset.position),

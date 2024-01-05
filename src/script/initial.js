@@ -18,7 +18,7 @@ function createBoardSpaces() {
 
 createBoardSpaces();
 
-export const spaces = board.querySelectorAll('.space');
+export const BOARD_SPACES = Array.from(board.querySelectorAll('.space'));
 
 /**
  * configura o tabuleiro
@@ -32,7 +32,7 @@ export function initialConfig() {
     
     let colorClass = 'white-black'; // black-white
     
-    for (const _space of spaces) {
+    for (const _space of BOARD_SPACES) {
         colorClass = (row % 2 === 0) ? 'black-white' : 'white-black';
         
         _space.classList.add(colorClass);

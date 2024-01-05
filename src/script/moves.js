@@ -1,44 +1,34 @@
-import { spaces } from "./initial";
-import { PLAYER_1, PLAYER_2 } from "./player";
+import { BOARD_SPACES } from "./initial";
+import { getCurrentPlayer } from "./player";
 
-export function initialMove(ticker, player) {
-    const space = spaces[ticker.position - 1];
+export function initialMove(ticker, player, color = null) {
+    const space = BOARD_SPACES[ticker.position - 1];
     
     space.dataset.space = 1;
     space.dataset.player = player;
     
-    space.classList.add(ticker.color);
+    const applyTickColor = ticker?.color || color;
+
+    space.classList.add(applyTickColor);
 }
 
-export function move(position, player, oldPosition) {
+export function move(position, player, oldPosition, currentPlayer) {
     try {
-        // array de check de usuario
-        const checkers = [
-            PLAYER_1.getTicker(oldPosition),
-            PLAYER_2.getTicker(oldPosition),
-        ];
-
-        const currentPlayer = !!checkers[0] ? PLAYER_1 
-            : (!!checkers[1]) ? PLAYER_2
-            : null;
-
-        currentPlayer.selectTick(currentPlayer.getTicker(oldPosition));
-
-        if (!currentPlayer || !currentPlayer.selected) {
+        if (!currentPlayer || !currentPlayer.selected || !player) {
             throw new Error('Nao foi possivel encontrar o jogador');
         }
-    
+        
         currentPlayer.selected.position = position;
         
         const spacePosition = oldPosition - 1;
-        spaces[spacePosition].dataset.space = 0;
-    
-        delete spaces[spacePosition].dataset.player;
-        delete spaces[spacePosition].dataset.selected;
-    
-        spaces[spacePosition].classList.remove(currentPlayer.color);
-    
-        initialMove(currentPlayer.selected, player);
+        BOARD_SPACES[spacePosition].dataset.space = 0;
+        
+        initialMove(currentPlayer.selected, player, currentPlayer.color);
+
+        delete BOARD_SPACES[spacePosition].dataset.player;
+        delete BOARD_SPACES[spacePosition].dataset.selected;
+
+        BOARD_SPACES[spacePosition].classList.remove(currentPlayer.color);
 
         currentPlayer.selected = null;
     } catch (err) {
@@ -52,66 +42,97 @@ export function moveChecker(tick) {
         return;
     }
 
-    const currentRow = Number(tick.dataset.row);
-    const nextRow = (tick?.dataset?.player === '1') ? currentRow - 1 : currentRow + 1;
-    const spaceNumberInCurrentRow = Number(tick.dataset.position) % 8;
+    // limpa qualquer casa destacada antes
+    clearHighlight(BOARD_SPACES.map((_space, index) => index));
+
+    const currentPlayer = getCurrentPlayer(tick.dataset.player);
 
     let isSpaceAlreadySelect = (tick?.hasAttribute('data-selected'));
-
-    let calcSpace = tick?.dataset?.player === '1'
-        ? (Number(tick.dataset.position) - 8)
-        : (Number(tick.dataset.position) + 8);
-    calcSpace = (calcSpace < 0) ? calcSpace * -1 : calcSpace;
-
-    const nextRowPositions = Array.from(spaces).map((_space, index) => {
-        const position = Number(_space.dataset.position);
-
-        if ((spaceNumberInCurrentRow === 1 && position === (calcSpace + 1)) 
-            || spaceNumberInCurrentRow === 8 && position === (calcSpace - 1)
-            || (position === (calcSpace - 1) || position === (calcSpace + 1))
-        ) {
-            return index;
-        }
-    }).filter(_space => !!_space);
 
     if (!isSpaceAlreadySelect) {
         tick.classList.add('selected');
         tick.dataset.selected = true;
+
+        // o jogador selecionou a peca
+        currentPlayer.selectTick(tick);
     } else {
         tick.classList.remove('selected');
         delete tick.dataset.selected;
+
+        currentPlayer.selectTick(null);
+    }
+
+    // calcula as possiveis posicoes para mover a peca
+    const nextRowPositions = calcPositionsToMove(tick);
+
+    // calcula todos os espacos nao usados
+    const positionsNotUsed = BOARD_SPACES.map((_space, index) => 
+        nextRowPositions.indexOf(index) === -1 ? index : null)
+        .filter(_space => !!_space);
+
+    // se a casa ja havia sido selecionada, nao seguir com os calculos
+    if (isSpaceAlreadySelect) {
+        return;
     }
 
     for (const _position of nextRowPositions) {
         const movePosition = () => {
             move(
-                Number(spaces[_position].dataset.position),
+                Number(BOARD_SPACES[_position].dataset.position),
                 tick?.dataset?.player,
                 Number(tick.dataset.position),
+                currentPlayer
             );
 
             for (const _position of nextRowPositions) {
-                spaces[_position].removeEventListener('click', movePosition, false);
+                BOARD_SPACES[_position].removeEventListener('click', movePosition, false);
             }
 
             clearHighlight(nextRowPositions);
         }
 
-        if (Number(spaces[_position].dataset.space) === 0) {
-
-            if (!isSpaceAlreadySelect) {
-                spaces[_position].classList.add('highlight');
-                spaces[_position].addEventListener('click', movePosition, { once: true });
+        if (Number(BOARD_SPACES[_position].dataset.space) === 0) {
+            if (!isSpaceAlreadySelect && tick.dataset.position === currentPlayer?.selected?.dataset?.position) {
+                BOARD_SPACES[_position].classList.add('highlight');
+                BOARD_SPACES[_position].addEventListener('click', movePosition, { once: true });
             } else {
-                spaces[_position].classList.remove('highlight');
-                spaces[_position].removeEventListener('click', movePosition, false);
+                BOARD_SPACES[_position].classList.remove('highlight');
+                BOARD_SPACES[_position].removeEventListener('click', movePosition, false);
             }
+        }
+
+        // remove de todas as outras
+        for (const _position of positionsNotUsed) {
+            BOARD_SPACES[_position].classList.remove('highlight');
+            BOARD_SPACES[_position].removeEventListener('click', movePosition, false);
         }
     }
 }
 
+function calcPositionsToMove(tick) {
+    const spaceNumberInCurrentRow = Number(tick.dataset.position) % 8;
+
+    let calcSpace = tick?.dataset?.player === '1'
+        ? (Number(tick.dataset.position) - 8)
+        : (Number(tick.dataset.position) + 8);
+    calcSpace = (calcSpace < 0) ? calcSpace * -1 : calcSpace;
+    
+    return BOARD_SPACES.map((_space, index) => {
+        const position = Number(_space.dataset.position);
+
+        if (_space.dataset.player === undefined &&
+            ((spaceNumberInCurrentRow === 1 && position === (calcSpace + 1)) 
+            || spaceNumberInCurrentRow === 8 && position === (calcSpace - 1)
+            || (position === (calcSpace - 1) || position === (calcSpace + 1)))
+        ) {
+            return index;
+        }
+    }).filter(_space => !!_space);
+}
+
 function clearHighlight(positionsHighlited) {
     for (const _highlited of positionsHighlited) {
-        spaces[_highlited].classList.remove('highlight');
+        BOARD_SPACES[_highlited].classList.remove('highlight');
+        BOARD_SPACES[_highlited].classList.remove('selected');
     }
 }

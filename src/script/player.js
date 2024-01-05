@@ -45,14 +45,13 @@ export class Player {
     }
 
     selectTick = (tick) => {
-        if (!!tick && !!this.selected && tick.position === this.selected.position) {
-            this.selected = null;
-            return;
-        }
-
         this.selected = tick;
     }
 }
 
 export const PLAYER_1 = new Player('white', TICKERS_PLAYER_1);
 export const PLAYER_2 = new Player('black', TICKERS_PLAYER_2);
+
+export function getCurrentPlayer(playerNumber) {
+    return  playerNumber === '1' ? PLAYER_1 : (playerNumber === '2') ? PLAYER_2 : null;
+}

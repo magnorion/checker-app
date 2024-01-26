@@ -30,14 +30,16 @@ const TICKERS_PLAYER_2 = [
 
 export class Player {
     ticker = null;
+    player = '';
     
     color = '';
     tickers = [];
     selected = null;
 
-    constructor(color, tickers) {
+    constructor(color, tickers, player) {
         this.color = color;
         this.tickers = tickers;
+        this.player = player;
     }
 
     getTicker = (position) => {
@@ -47,10 +49,27 @@ export class Player {
     selectTick = (tick) => {
         this.selected = tick;
     }
+
+    lostATick = (position) => {
+        this.searchTickByPosition(position).is_alive = false;
+    }
+
+    updateTickPosition = (position, newPosition) => {
+        this.searchTickByPosition(Number(position)).position = Number(newPosition);
+    }
+
+    searchTickByPosition = (position) => {
+        const index = this.tickers.findIndex(_ticker => _ticker.position === position);
+        if (index !== -1) {
+            return this.tickers[index];
+        }
+
+        return null;
+    }
 }
 
-export const PLAYER_1 = new Player('white', TICKERS_PLAYER_1);
-export const PLAYER_2 = new Player('black', TICKERS_PLAYER_2);
+export const PLAYER_1 = new Player('white', TICKERS_PLAYER_1, '1');
+export const PLAYER_2 = new Player('black', TICKERS_PLAYER_2, '2');
 
 export function getCurrentPlayer(playerNumber) {
     return  playerNumber === '1' ? PLAYER_1 : (playerNumber === '2') ? PLAYER_2 : null;

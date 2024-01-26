@@ -10,7 +10,6 @@ function createBoardSpaces() {
     for (let _space = 1; _space <= 64; _space++) {
         let li = document.createElement('li');
         li.classList.add('space');
-        li.innerText = _space;
 
         board.append(li);
     }

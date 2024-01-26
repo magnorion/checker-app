@@ -1,15 +1,21 @@
-import { BOARD_SPACES } from "./initial";
-import { getCurrentPlayer } from "./player";
+import { BOARD_SPACES } from './initial';
+import { getCurrentPlayer } from './player';
+import { playerLostATick } from './states';
 
 export function move(ticker, player, color = null) {
-    const space = BOARD_SPACES[ticker.position - 1];
-    
+    const tickerIndex = (!!ticker?.dataset)
+        ? ticker?.dataset?.position
+        : ticker?.position;
+
+    const space = BOARD_SPACES[tickerIndex - 1];
+
     space.dataset.space = 1;
     space.dataset.player = player;
-    
-    const applyTickColor = ticker?.color || color;
+    space.classList.add(ticker?.color || color);
 
-    space.classList.add(applyTickColor);
+    if (!!space?.dataset?.remove) {
+        playerLostATick(BOARD_SPACES[Number(space.dataset.remove) - 1], player);
+    }
 }
 
 export function prepareToMove(position, player, oldPosition, currentPlayer) {
@@ -17,8 +23,9 @@ export function prepareToMove(position, player, oldPosition, currentPlayer) {
         if (!currentPlayer || !currentPlayer.selected || !player) {
             return;
         }
-        
-        currentPlayer.selected.position = position;
+
+        currentPlayer.updateTickPosition(currentPlayer.selected.dataset.position, position);
+        currentPlayer.selected.dataset.position = position;
         
         const spacePosition = oldPosition - 1;
         BOARD_SPACES[spacePosition].dataset.space = 0;
@@ -120,11 +127,34 @@ function calcPositionsToMove(tick) {
     return BOARD_SPACES.map((_space, index) => {
         const position = Number(_space.dataset.position);
 
-        if (_space.dataset.player === undefined &&
+        // checa se existe alguma peca pelo caminho e se existir, calcula o espaco possivel
+        if (
+            _space.dataset.space !== -1 &&
+            _space.dataset.player !== tick.dataset.player &&
             ((spaceNumberInCurrentRow === 1 && position === (calcSpace + 1)) 
             || spaceNumberInCurrentRow === 8 && position === (calcSpace - 1)
             || (position === (calcSpace - 1) || position === (calcSpace + 1)))
         ) {
+            const currentTickInValidation = BOARD_SPACES[index];
+            if (
+                !!currentTickInValidation?.dataset?.player 
+                && currentTickInValidation.dataset.player !== tick.dataset.player
+            ) {
+                let currentPosition = Number(currentTickInValidation.dataset.position);
+                let diffPosition = currentPosition - Number(tick.dataset.position);
+                diffPosition = diffPosition < 0 ? diffPosition * -1 : diffPosition;
+
+                const nextSpace = BOARD_SPACES[currentPosition - 1].dataset.player === '1'
+                    ? currentPosition + diffPosition
+                    : currentPosition - diffPosition;
+
+                if (!BOARD_SPACES[nextSpace - 1]?.dataset?.player) {
+                    BOARD_SPACES[nextSpace - 1].dataset.remove = currentPosition;
+                    return nextSpace - 1;
+                }
+            }
+
+            // retorna o index possivel, se nao houver nenhuma peca pelo caminho
             return index;
         }
     }).filter(_space => !!_space);
